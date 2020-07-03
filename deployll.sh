@@ -304,19 +304,19 @@ function setup_init_script ()
     su - $2 -c "cd ${1}/${XAPI_SUBDIR}; pm2-runtime start xapi.json"
     output "done" true true
 
-    # su - $2 -c "pm2 save"
+    su - $2 -c "pm2 save"
     # I'm going to apologise here for the below line - for some reason when executing the resultant command
     # from the output of pm2 startup, the system $PATH doesn't seem to be set so we have to force it to be
     # an absolute path before running the command. It also needs to go into a variable and be run rather than
     # be run within backticks or the path still isn't substituted correctly. I know, right? it's a pain.
     # output "setting up PM2 startup"
-    # if [[ $PM2_OVERRIDE != false ]]; then
-    #     output "using PM2 startup override of $PM2_OVERRIDE"
-    #     PM2_STARTUP=$(su - $2 -c "pm2 startup $PM2_OVERRIDE | grep sudo | sed 's?sudo ??' | sed 's?\$PATH?$PATH?'")
-    # else
-    #     PM2_STARTUP=$(su - $2 -c "pm2 startup | grep sudo | sed 's?sudo ??' | sed 's?\$PATH?$PATH?'")
-    # fi
-    # CHK=$($PM2_STARTUP)
+    if [[ $PM2_OVERRIDE != false ]]; then
+        output "using PM2 startup override of $PM2_OVERRIDE"
+        PM2_STARTUP=$(su - $2 -c "pm2 startup $PM2_OVERRIDE | grep sudo | sed 's?sudo ??' | sed 's?\$PATH?$PATH?'")
+    else
+        PM2_STARTUP=$(su - $2 -c "pm2 startup | grep sudo | sed 's?sudo ??' | sed 's?\$PATH?$PATH?'")
+    fi
+    CHK=$($PM2_STARTUP)
 
     if [[ $OS_SUBVER == "fedora" ]]; then
         output_log "fedora detected, SELinux may get in the way"
@@ -2106,7 +2106,11 @@ if [[ $LOCAL_INSTALL == true ]] && [[ $UPDATE_MODE == false ]]; then
     if [[ $ENTERPRISE != true ]]; then
         output_log "setting up init script. Path: $LOCAL_PATH user: $LOCAL_USER"
         setup_init_script $LOCAL_PATH $LOCAL_USER
-        # service pm2-${LOCAL_USER} start
+
+        # Replaced the flaky PM2 service call with this....
+        # su - $2 -c "cd ${1}/${WEBAPP_SUBDIR}; pm2-runtime start all.json"
+        # su - $2 -c "cd ${1}/${XAPI_SUBDIR}; pm2-runtime start xapi.json"
+        service pm2-${LOCAL_USER} start
     fi
 
 
@@ -2342,7 +2346,7 @@ elif [[ $LOCAL_INSTALL == true ]] && [[ $UPDATE_MODE == true ]]; then
         echo "[LL] Stopping nginx...."
         service nginx stop
         echo "[LL] Stopping pm2 processes...."
-        # service pm2-${LOCAL_USER} stop
+        service pm2-${LOCAL_USER} stop
         echo "[LL] re-symlinking directory...."
         unlink $SYMLINK_PATH
         ln -s $LOCAL_PATH $SYMLINK_PATH
@@ -2350,7 +2354,7 @@ elif [[ $LOCAL_INSTALL == true ]] && [[ $UPDATE_MODE == true ]]; then
         su - ${LOCAL_USER} -c "cd ${LOCAL_PATH}/${WEBAPP_SUBDIR}; $PM2_PATH start all.json"
         su - ${LOCAL_USER} -c "cd ${LOCAL_PATH}/${XAPI_SUBDIR}; $PM2_PATH start xapi.json"
         su - ${LOCAL_USER} -c "$PM2_PATH save"
-        # service pm2-${LOCAL_USER} restart
+        service pm2-${LOCAL_USER} restart
         echo "[LL] PM2 processes restarted"
         echo "[LL] restarting nginx...."
         service nginx start
@@ -2368,7 +2372,7 @@ elif [[ $LOCAL_INSTALL == true ]] && [[ $UPDATE_MODE == true ]]; then
         service nginx reload
 
         echo "[LL] reloading pm2"
-        # service pm2-${LOCAL_USER} reload
+        service pm2-${LOCAL_USER} reload
     fi
 
 
