@@ -450,7 +450,7 @@ function base_install ()
     cd ${WEBAPP_SUBDIR}
     GIT_REV=`git rev-parse --verify HEAD`
     if [[ ! -f .env ]]; then
-        cp .env.example .env
+        cp /usr/local/.llenv .env
         if [[ $UPDATE_MODE == false ]]; then
             output "Copied example env to .env - This will need editing by hand"
         fi
@@ -539,7 +539,7 @@ function xapi_install ()
 
     # sort out .env
     if [[ ! -f .env ]]; then
-        cp .env.example .env
+        cp /usr/local/.xapienv .env
         if [[ $UPDATE_MODE == false ]]; then
             output "Copied example env to .env - This will need editing by hand"
         fi
