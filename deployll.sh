@@ -2106,7 +2106,7 @@ if [[ $LOCAL_INSTALL == true ]] && [[ $UPDATE_MODE == false ]]; then
     if [[ $ENTERPRISE != true ]]; then
         output_log "setting up init script. Path: $LOCAL_PATH user: $LOCAL_USER"
         setup_init_script $LOCAL_PATH $LOCAL_USER
-        service pm2-${LOCAL_USER} start
+        # service pm2-${LOCAL_USER} start
     fi
 
 
@@ -2342,7 +2342,7 @@ elif [[ $LOCAL_INSTALL == true ]] && [[ $UPDATE_MODE == true ]]; then
         echo "[LL] Stopping nginx...."
         service nginx stop
         echo "[LL] Stopping pm2 processes...."
-        service pm2-${LOCAL_USER} stop
+        # service pm2-${LOCAL_USER} stop
         echo "[LL] re-symlinking directory...."
         unlink $SYMLINK_PATH
         ln -s $LOCAL_PATH $SYMLINK_PATH
@@ -2350,7 +2350,7 @@ elif [[ $LOCAL_INSTALL == true ]] && [[ $UPDATE_MODE == true ]]; then
         su - ${LOCAL_USER} -c "cd ${LOCAL_PATH}/${WEBAPP_SUBDIR}; $PM2_PATH start all.json"
         su - ${LOCAL_USER} -c "cd ${LOCAL_PATH}/${XAPI_SUBDIR}; $PM2_PATH start xapi.json"
         su - ${LOCAL_USER} -c "$PM2_PATH save"
-        service pm2-${LOCAL_USER} restart
+        # service pm2-${LOCAL_USER} restart
         echo "[LL] PM2 processes restarted"
         echo "[LL] restarting nginx...."
         service nginx start
@@ -2368,7 +2368,7 @@ elif [[ $LOCAL_INSTALL == true ]] && [[ $UPDATE_MODE == true ]]; then
         service nginx reload
 
         echo "[LL] reloading pm2"
-        service pm2-${LOCAL_USER} reload
+        # service pm2-${LOCAL_USER} reload
     fi
 
 
