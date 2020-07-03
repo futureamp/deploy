@@ -295,27 +295,28 @@ function setup_init_script ()
     fi
 
 
+    #NOTE: The below has been changed from pm2 to pm2-runtime for docker compatability
     output "starting base processes...." true
-    su - $2 -c "cd ${1}/${WEBAPP_SUBDIR}; pm2 start all.json"
+    su - $2 -c "cd ${1}/${WEBAPP_SUBDIR}; pm2-runtime start all.json"
     output "done" true true
 
     output "starting xapi process...." true
-    su - $2 -c "cd ${1}/${XAPI_SUBDIR}; pm2 start xapi.json"
+    su - $2 -c "cd ${1}/${XAPI_SUBDIR}; pm2-runtime start xapi.json"
     output "done" true true
 
-    su - $2 -c "pm2 save"
+    # su - $2 -c "pm2 save"
     # I'm going to apologise here for the below line - for some reason when executing the resultant command
     # from the output of pm2 startup, the system $PATH doesn't seem to be set so we have to force it to be
     # an absolute path before running the command. It also needs to go into a variable and be run rather than
     # be run within backticks or the path still isn't substituted correctly. I know, right? it's a pain.
-    output "setting up PM2 startup"
-    if [[ $PM2_OVERRIDE != false ]]; then
-        output "using PM2 startup override of $PM2_OVERRIDE"
-        PM2_STARTUP=$(su - $2 -c "pm2 startup $PM2_OVERRIDE | grep sudo | sed 's?sudo ??' | sed 's?\$PATH?$PATH?'")
-    else
-        PM2_STARTUP=$(su - $2 -c "pm2 startup | grep sudo | sed 's?sudo ??' | sed 's?\$PATH?$PATH?'")
-    fi
-    CHK=$($PM2_STARTUP)
+    # output "setting up PM2 startup"
+    # if [[ $PM2_OVERRIDE != false ]]; then
+    #     output "using PM2 startup override of $PM2_OVERRIDE"
+    #     PM2_STARTUP=$(su - $2 -c "pm2 startup $PM2_OVERRIDE | grep sudo | sed 's?sudo ??' | sed 's?\$PATH?$PATH?'")
+    # else
+    #     PM2_STARTUP=$(su - $2 -c "pm2 startup | grep sudo | sed 's?sudo ??' | sed 's?\$PATH?$PATH?'")
+    # fi
+    # CHK=$($PM2_STARTUP)
 
     if [[ $OS_SUBVER == "fedora" ]]; then
         output_log "fedora detected, SELinux may get in the way"
